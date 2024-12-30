@@ -196,63 +196,77 @@ const PlayerList = ({ players, onUpdatePlayer, onDeletePlayer }) => {
 
     return (
         <div className="player-list">
-            {players.map(player => (
-                <div key={player.id} className="player-card">
-                    <div className="player-content">
-                        <div className="player-header">
-                            <div className="player-photo-container">
-                                {player.photoUrl ? (
-                                    <img 
-                                        src={player.photoUrl} 
-                                        alt={player.name} 
-                                        className="player-photo"
-                                    />
-                                ) : (
-                                    <div className="player-photo-placeholder">
-                                        {player.name.charAt(0)}
+            {players.map(player => {
+                const overallScore = calculateOverallScore(player, player.position);
+                const positionColor = getPositionColor(player.position);
+                
+                return (
+                    <div key={player.id} className="player-card">
+                        <div className="player-content">
+                            <div className="player-header">
+                                <div className="player-photo-container">
+                                    {player.photoUrl ? (
+                                        <img 
+                                            src={player.photoUrl} 
+                                            alt={player.name} 
+                                            className="player-photo"
+                                        />
+                                    ) : (
+                                        <div className="player-photo-placeholder">
+                                            {player.name.charAt(0)}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="player-info">
+                                    <h3 className="player-name">{player.name}</h3>
+                                    <div className="player-meta">
+                                        <span 
+                                            className="position"
+                                            style={{ background: positionColor }}
+                                        >
+                                            {player.position}
+                                        </span>
+                                        <span className="overall-score">
+                                            {overallScore}
+                                        </span>
                                     </div>
-                                )}
+                                </div>
+                                <button
+                                    className="delete-button"
+                                    onClick={() => onDeletePlayer(player.id)}
+                                >
+                                    ×
+                                </button>
                             </div>
-                            <div className="player-info">
-                                <h3 className="player-name">{player.name}</h3>
-                                <div className="player-meta">
-                                    <span 
-                                        className="position"
-                                        style={{
-                                            backgroundColor: getPositionColor(player.position),
-                                            color: 'white'
-                                        }}
-                                    >
-                                        {player.position}
-                                    </span>
-                                    <span className="overall-score">
-                                        OVR: {calculateOverallScore(player, player.position)}
-                                    </span>
+                            
+                            <div className="player-stats">
+                                <div className="overall-label">
+                                    <span>Overall Rating</span>
+                                    <span>{overallScore}</span>
+                                </div>
+                                <div className="overall-progress">
+                                    <div 
+                                        className="overall-progress-fill"
+                                        style={{ width: `${overallScore}%` }}
+                                    />
+                                </div>
+                                <div className="stats-chart">
+                                    {renderStatsChart(player)}
                                 </div>
                             </div>
-                            <button 
-                                className="delete-button"
-                                onClick={() => onDeletePlayer(player.id)}
-                                title="Delete player"
+
+                            <button
+                                className="edit-button"
+                                onClick={() => handleViewStats(player)}
                             >
-                                ×
+                                View Stats
                             </button>
                         </div>
-
-                        <div className="player-stats">
-                            {renderStatsChart(player, true)}
-                        </div>
-
-                        <button 
-                            className="view-stats-button"
-                            onClick={() => handleViewStats(player)}
-                        >
-                            View Detailed Stats
-                        </button>
                     </div>
-                </div>
-            ))}
-
+                );
+            })}
+            
+            {/* Stats Modal */}
             {viewingStats && (
                 <div className="stats-modal-overlay" onClick={handleCloseStats}>
                     <div className="stats-modal-content" onClick={e => e.stopPropagation()}>

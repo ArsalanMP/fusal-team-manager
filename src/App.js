@@ -4,6 +4,7 @@ import PlayerImportModal from './components/PlayerImportModal';
 import PlayerList from './components/PlayerList';
 import TeamGenerator from './components/TeamGenerator';
 import VotingPage from './pages/VotingPage';
+import Logo from './components/Logo';
 import './App.css';
 
 function App() {
@@ -42,7 +43,10 @@ function App() {
         <Router>
             <div className="App">
                 <header className="App-header">
-                    <Link to="/" className="app-title">Futsal Team Manager</Link>
+                    <Link to="/" className="app-title">
+                        <Logo size={32} />
+                        <span>Futsal Team Manager</span>
+                    </Link>
                     <div className="header-actions">
                         <Link to="/" className="nav-link">Players</Link>
                         <Link to="/vote" className="nav-link">Vote</Link>

@@ -125,7 +125,52 @@
     border-radius: 8px;
 }
 
-.stats-chart {
+/* Progress bar container and elements */
+.player-card .overall-label,
+.player-card .overall-progress {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .player-card .stats-chart {
+        display: none;
+    }
+
+    .player-card .overall-label,
+    .player-card .overall-progress {
+        display: flex;
+    }
+}
+
+.overall-progress {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin: 8px 0;
+}
+
+.overall-progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.overall-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.player-card .stats-chart {
     position: relative;
     margin: 0 auto;
     max-width: 100%;
@@ -502,8 +547,7 @@
     }
 
     .stats-chart {
-        transform: scale(0.9);
-        margin: -10px auto;
+        display: none;
     }
 
     .edit-button {
@@ -703,6 +747,48 @@
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
+/* Stats chart styles */
+.stats-chart {
+    position: relative;
+    margin: 0 auto;
+    max-width: 100%;
+    overflow: visible;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+.stats-modal-body .stats-chart {
+    padding: 20px;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    /* Hide chart only in player cards */
+    .player-card .stats-chart {
+        display: none;
+    }
+
+    /* Keep chart visible in modal but adjust size */
+    .stats-modal-body .stats-chart {
+        padding: 10px;
+        transform: scale(0.95);
+        margin: -10px 0;
+    }
+
+    .stats-modal-body .stat-label {
+        font-size: 10px !important;
+    }
+
+    .stats-modal-body .stat-value {
+        font-size: 9px !important;
+    }
+}
+
+/* Remove the conflicting media queries */
+/* Delete or comment out the following media queries that were causing conflicts */
+/*
 @media (max-width: 768px) {
     .stats-chart {
         padding: 5px;
@@ -715,4 +801,5 @@
     .stats-chart svg {
         transform: scale(0.9);
     }
-} 
+}
+*/ 
