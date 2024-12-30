@@ -79,6 +79,7 @@ function App() {
                             <VotingPage 
                                 players={players}
                                 onSubmitVote={handleSubmitVote}
+                                onUpdatePlayer={handleUpdatePlayer}
                             />
                         } />
                         <Route path="/team-generator" element={

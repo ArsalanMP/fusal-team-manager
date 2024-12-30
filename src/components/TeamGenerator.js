@@ -73,25 +73,28 @@ function TeamGenerator({ players }) {
     setGeneratedTeams(teams);
   };
 
+  const maxTeams = Math.floor(players.length / 2);
+  const isValidTeamCount = numberOfTeams >= 2 && numberOfTeams <= maxTeams;
+
   return (
     <div className="team-generator">
       <div className="generator-controls">
         <label>
-          Number of Teams:
+          Number of Teams
           <input
             type="number"
             min="2"
-            max={Math.floor(players.length / 2)}
+            max={maxTeams}
             value={numberOfTeams}
             onChange={(e) => setNumberOfTeams(parseInt(e.target.value))}
           />
         </label>
         <button 
           onClick={generateTeams} 
-          disabled={players.length < numberOfTeams * 2}
+          disabled={!isValidTeamCount}
           className="generate-button"
         >
-          Generate Teams
+          {isValidTeamCount ? 'Generate Teams' : `Need at least ${numberOfTeams * 2} players`}
         </button>
       </div>
 
@@ -99,7 +102,10 @@ function TeamGenerator({ players }) {
         <div className="teams-display">
           {generatedTeams.map((team, index) => (
             <div key={index} className="team-card">
-              <h3>Team {index + 1}</h3>
+              <h3>
+                Team {index + 1}
+                <span className="team-number-badge">{team.players.length} players</span>
+              </h3>
               <div className="team-stats">
                 <span className="team-average">
                   Team Rating: {(team.totalScore / team.players.length).toFixed(1)}
@@ -120,7 +126,7 @@ function TeamGenerator({ players }) {
                         {player.position}
                       </span>
                       <span className="player-score">
-                        {player.overallScore}
+                        Rating: {player.overallScore.toFixed(1)}
                       </span>
                     </div>
                   </li>

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { playerAttributes } from '../models/playerModel';
-import { validateVote } from '../models/voteModel';
 import './PlayerVote.css';
 
 const PlayerVote = ({ player, onSubmitVote }) => {
@@ -23,9 +22,7 @@ const PlayerVote = ({ player, onSubmitVote }) => {
             timestamp: new Date()
         };
 
-        if (validateVote(voteToSubmit)) {
-            onSubmitVote(voteToSubmit);
-        }
+        onSubmitVote(voteToSubmit);
     };
 
     const handleAttributeChange = (key, value) => {
