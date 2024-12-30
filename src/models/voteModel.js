@@ -31,6 +31,32 @@ export const calculateAverageStats = (votes) => {
     return averages;
 };
 
+// Check if a voter has already voted for a player
+export const hasVoted = (votes, voterId, playerId) => {
+    return votes.some(vote => 
+        vote.voterId === voterId && 
+        vote.playerId === playerId
+    );
+};
+
+// Calculate player's score based on votes
+export const calculatePlayerScoreFromVotes = (votes, player) => {
+    if (!votes || votes.length === 0) return player;
+
+    // Get average stats from votes
+    const averageStats = calculateAverageStats(votes);
+    
+    // Create a new player object with updated stats
+    const updatedPlayer = { ...player };
+    
+    // Update each attribute with the average from votes
+    Object.keys(averageStats).forEach(key => {
+        updatedPlayer[key] = averageStats[key];
+    });
+
+    return updatedPlayer;
+};
+
 // Validate vote values
 export const validateVote = (vote) => {
     if (!vote.playerId || !vote.voterId) {

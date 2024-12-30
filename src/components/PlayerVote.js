@@ -4,77 +4,72 @@ import { validateVote } from '../models/voteModel';
 import './PlayerVote.css';
 
 const PlayerVote = ({ player, onSubmitVote }) => {
-    const [vote, setVote] = useState({
-        playerId: player.id,
-        voterId: '', // This should be set to the current user's ID
-        attributes: Object.keys(playerAttributes).reduce((acc, key) => {
-            acc[key] = 50; // Default value
-            return acc;
-        }, {}),
-        comment: ''
-    });
+    const initialAttributes = Object.keys(playerAttributes).reduce((acc, key) => {
+        // Start with current player values if they exist, otherwise use 50
+        acc[key] = player[key] || 50;
+        return acc;
+    }, {});
+
+    const [attributes, setAttributes] = useState(initialAttributes);
+    const [comment, setComment] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (validateVote(vote)) {
-            onSubmitVote({
-                ...vote,
-                timestamp: new Date()
-            });
+        
+        const voteToSubmit = {
+            playerId: player.id,
+            attributes,
+            comment,
+            timestamp: new Date()
+        };
+
+        if (validateVote(voteToSubmit)) {
+            onSubmitVote(voteToSubmit);
         }
     };
 
+    const handleAttributeChange = (key, value) => {
+        setAttributes(prev => ({
+            ...prev,
+            [key]: parseInt(value)
+        }));
+    };
+
     return (
-        <div className="player-vote">
-            <div className="vote-header">
-                <h2>Rate Player: {player.name}</h2>
-                <div className="player-info">
-                    <span className="position">{player.position}</span>
-                </div>
+      <form onSubmit={handleSubmit} className="player-vote">
+        <div className="stats-grid">
+          {Object.entries(playerAttributes).map(([key, { label }]) => (
+            <div key={key} className="stat-item">
+              <label>{label}</label>
+              <div className="stat-input-group">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={attributes[key]}
+                  onChange={(e) => handleAttributeChange(key, e.target.value)}
+                />
+              </div>
+              <span className="stat-value">{attributes[key]}</span>
             </div>
-
-            <form onSubmit={handleSubmit} className="vote-form">
-                <div className="stats-grid">
-                    {Object.entries(playerAttributes).map(([key, { label }]) => (
-                        <div key={key} className="stat-item">
-                            <label>{label}:</label>
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={vote.attributes[key]}
-                                onChange={(e) => setVote({
-                                    ...vote,
-                                    attributes: {
-                                        ...vote.attributes,
-                                        [key]: parseInt(e.target.value)
-                                    }
-                                })}
-                            />
-                            <span>{vote.attributes[key]}</span>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="form-group">
-                    <label>Comment (optional):</label>
-                    <textarea
-                        value={vote.comment}
-                        onChange={(e) => setVote({
-                            ...vote,
-                            comment: e.target.value
-                        })}
-                        placeholder="Add a comment about your rating..."
-                    />
-                </div>
-
-                <div className="button-group">
-                    <button type="submit" className="submit-vote">
-                        Submit Vote
-                    </button>
-                </div>
-            </form>
+          ))}
         </div>
+
+        <div className="form-group">
+          <label>Comment</label>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Optional: Add a comment about your rating"
+          />
+        </div>
+
+        <div className="button-group">
+          <button type="submit" className="submit-vote">
+            Submit Vote
+          </button>
+        </div>
+      </form>
     );
 };
 
