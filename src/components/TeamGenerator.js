@@ -1,21 +1,11 @@
 import React, { useState } from 'react';
 import { calculateOverallScore } from '../models/playerModel';
+import PlayerListView from './PlayerListView';
 import './TeamGenerator.css';
 
 function TeamGenerator({ players }) {
   const [numberOfTeams, setNumberOfTeams] = useState(2);
   const [generatedTeams, setGeneratedTeams] = useState(null);
-
-  const getPositionColor = (position) => {
-    const colors = {
-      'Pivot': '#ff6b6b',
-      'Ala': '#4dabf7',
-      'Fixo': '#51cf66',
-      'Universal': '#845ef7',
-      'Goleiro': '#ffd43b'
-    };
-    return colors[position] || '#868e96';
-  };
 
   const generateTeams = () => {
     // Calculate overall scores for all players
@@ -80,7 +70,7 @@ function TeamGenerator({ players }) {
     <div className="team-generator">
       <div className="generator-controls">
         <label>
-          Number of Teams
+          Number of Teams:
           <input
             type="number"
             min="2"
@@ -102,36 +92,13 @@ function TeamGenerator({ players }) {
         <div className="teams-display">
           {generatedTeams.map((team, index) => (
             <div key={index} className="team-card">
-              <h3>
-                Team {index + 1}
-                <span className="team-number-badge">{team.players.length} players</span>
-              </h3>
-              <div className="team-stats">
-                <span className="team-average">
-                  Team Rating: {(team.totalScore / team.players.length).toFixed(1)}
-                </span>
+              <div className="team-header">
+                <h3 className="team-title">Team {index + 1}</h3>
+                <div className="team-stats">
+                  Rating: {(team.totalScore / team.players.length).toFixed(1)}
+                </div>
               </div>
-              <ul className="player-list">
-                {team.players.map(player => (
-                  <li key={player.id} className="player-item">
-                    <span className="player-name">{player.name}</span>
-                    <div className="player-details">
-                      <span 
-                        className="player-position"
-                        style={{
-                          backgroundColor: getPositionColor(player.position),
-                          color: 'white'
-                        }}
-                      >
-                        {player.position}
-                      </span>
-                      <span className="player-score">
-                        Rating: {player.overallScore.toFixed(1)}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <PlayerListView players={team.players} variant="simple" />
             </div>
           ))}
         </div>
