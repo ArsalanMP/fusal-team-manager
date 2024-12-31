@@ -1,15 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { playerRoles, playerAttributes } from '../models/playerModel';
+import { playerRoles } from '../models/playerModel';
 import './PlayerImportModal.css';
 
 function PlayerImportModal({ isOpen, onClose, onAddPlayer }) {
     const [player, setPlayer] = useState({
         name: '',
-        position: playerRoles[0],
-        ...Object.keys(playerAttributes).reduce((acc, attr) => ({
-            ...acc,
-            [attr]: 50  // Default value for all attributes
-        }), {})
+        position: playerRoles[0]
     });
     const [photoPreview, setPhotoPreview] = useState(null);
     const fileInputRef = useRef();
@@ -37,11 +33,7 @@ function PlayerImportModal({ isOpen, onClose, onAddPlayer }) {
         // Reset form
         setPlayer({
             name: '',
-            position: playerRoles[0],
-            ...Object.keys(playerAttributes).reduce((acc, attr) => ({
-                ...acc,
-                [attr]: 50
-            }), {})
+            position: playerRoles[0]
         });
         setPhotoPreview(null);
         if (fileInputRef.current) {
@@ -97,25 +89,6 @@ function PlayerImportModal({ isOpen, onClose, onAddPlayer }) {
                                 <option key={role} value={role}>{role}</option>
                             ))}
                         </select>
-                    </div>
-
-                    <div className="stats-grid">
-                        {Object.entries(playerAttributes).map(([key, { label }]) => (
-                            <div key={key} className="stat-item">
-                                <label>{label}:</label>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={player[key]}
-                                    onChange={(e) => setPlayer({
-                                        ...player,
-                                        [key]: parseInt(e.target.value)
-                                    })}
-                                />
-                                <span>{player[key]}</span>
-                            </div>
-                        ))}
                     </div>
 
                     <button type="submit" className="submit-button">
