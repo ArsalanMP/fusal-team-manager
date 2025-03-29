@@ -1,36 +1,11 @@
 .player-list-view {
-<<<<<<< HEAD:src/components/PlayerListView.css
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-=======
   display: flex;
   flex-direction: column;
   gap: 8px;
->>>>>>> 421dbc3 (feat: Next App):components/PlayerListView.css
 }
 
 /* Default variant */
 .player-list-view.default .player-list-item {
-<<<<<<< HEAD:src/components/PlayerListView.css
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    background: linear-gradient(135deg, #2c3e50, #3498db);
-    border-radius: 8px;
-    color: white;
-}
-
-.player-list-view.default .player-name {
-    font-weight: 500;
-}
-
-.player-list-view.default .player-details {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-=======
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -48,30 +23,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
->>>>>>> 421dbc3 (feat: Next App):components/PlayerListView.css
 }
 
 /* Simple variant */
 .player-list-view.simple .player-list-item {
-<<<<<<< HEAD:src/components/PlayerListView.css
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    color: white;
-}
-
-.player-list-view.simple .player-name {
-    font-weight: normal;
-}
-
-.player-list-view.simple .player-details {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-=======
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -89,37 +44,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
->>>>>>> 421dbc3 (feat: Next App):components/PlayerListView.css
 }
 
 /* Common styles */
 .player-position {
-<<<<<<< HEAD:src/components/PlayerListView.css
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-    color: white;
-}
-
-.player-score {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 8px;
-    border-radius: 4px;
-}
-
-@media (max-width: 768px) {
-    .player-list-item {
-        padding: 10px;
-    }
-
-    .player-details {
-        gap: 8px;
-    }
-} 
-=======
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -144,4 +72,3 @@
     gap: 8px;
   }
 }
->>>>>>> 421dbc3 (feat: Next App):components/PlayerListView.css
