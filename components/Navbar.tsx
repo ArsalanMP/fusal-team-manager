@@ -1,5 +1,5 @@
 "use client";
-
+import React from "react";
 import Link from "next/link";
 
 // Components
@@ -8,7 +8,7 @@ import Logo from "@/components/Logo";
 // Hooks
 import { usePlayerModal } from "@/utils/logic";
 
-const Navbar = () => {
+const Navbar: React.FC = () => {
   const { openModal } = usePlayerModal();
 
   return (

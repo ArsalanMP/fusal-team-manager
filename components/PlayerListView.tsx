@@ -1,8 +1,14 @@
+import { Player, PlayerRole } from "@/models/types";
 import "./PlayerListView.css";
 
-function PlayerListView({ players, variant = "default" }) {
-  const getPositionColor = (position) => {
-    const colors = {
+interface PlayerListViewProps {
+  players: Player[];
+  variant?: "default" | "compact" | "detailed";
+}
+
+function PlayerListView({ players, variant = "default" }: PlayerListViewProps) {
+  const getPositionColor = (position: PlayerRole): string => {
+    const colors: Record<PlayerRole, string> = {
       Pivot: "#ff6b6b",
       Ala: "#4dabf7",
       Fixo: "#51cf66",

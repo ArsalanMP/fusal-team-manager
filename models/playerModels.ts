@@ -1,5 +1,7 @@
+import { Player as PlayerInterface, PlayerAttribute, PlayerAttributes, PlayerRole, PositionWeightsMap } from './types';
+
 // Player attributes and their weights for overall score calculation
-export const playerAttributes = {
+export const playerAttributes: PlayerAttributes = {
   speed: { label: "Speed", weight: 0.15 },
   shotPower: { label: "Shot Power", weight: 0.15 },
   shotAccuracy: { label: "Shot Accuracy", weight: 0.15 },
@@ -15,7 +17,7 @@ export const playerAttributes = {
 };
 
 // Updated for futsal positions
-export const playerRoles = [
+export const playerRoles: PlayerRole[] = [
   "Pivot", // Main striker/target player
   "Ala", // Wing player
   "Fixo", // Defensive specialist
@@ -23,9 +25,9 @@ export const playerRoles = [
   "Goleiro", // Goalkeeper
 ];
 
-export const calculateOverallScore = (player, position) => {
+export const calculateOverallScore = (player: PlayerInterface, position?: PlayerRole): string => {
   // Position-specific attribute weights
-  const positionWeights = {
+  const positionWeights: PositionWeightsMap = {
     Pivot: {
       shotPower: 0.25,
       shotAccuracy: 0.25,
@@ -80,19 +82,53 @@ export const calculateOverallScore = (player, position) => {
   return (total / weightSum || 0).toFixed(1);
 };
 
-class Player {
-  constructor(id, name, position) {
+class Player implements PlayerInterface {
+  id: string;
+  name: string;
+  position: PlayerRole;
+  photoUrl: string | null;
+  lastModified: Date;
+  speed: number;
+  shotPower: number;
+  shotAccuracy: number;
+  physics: number;
+  goalkeeping: number;
+  dribbling: number;
+  passing: number;
+  defense: number;
+  stamina: number;
+  teamPlay: number;
+  positioning: number;
+  reliability: number;
+  [key: string]: any;
+
+  constructor(id: string, name: string, position: PlayerRole) {
     this.id = id;
     this.name = name;
     this.position = position;
     this.photoUrl = null;
-
-    // Initialize all attributes
-    Object.keys(playerAttributes).forEach((attr) => {
-      this[attr] = 0;
-    });
-
     this.lastModified = new Date();
+
+    // Initialize all attributes to 0
+    this.speed = 0;
+    this.shotPower = 0;
+    this.shotAccuracy = 0;
+    this.physics = 0;
+    this.goalkeeping = 0;
+    this.dribbling = 0;
+    this.passing = 0;
+    this.defense = 0;
+    this.stamina = 0;
+    this.teamPlay = 0;
+    this.positioning = 0;
+    this.reliability = 0;
+
+    // Initialize any additional attributes
+    Object.keys(playerAttributes).forEach((attr) => {
+      if (!(attr in this)) {
+        this[attr] = 0;
+      }
+    });
   }
 }
 

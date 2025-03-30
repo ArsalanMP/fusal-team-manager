@@ -1,34 +1,53 @@
 "use client";
 
+// Components
+import Image from "next/image";
+
 // Hooks
-import React, { useState, useRef } from "react";
+import { useState, useRef, ChangeEvent, FormEvent } from "react";
 
 // Models
 import { playerRoles } from "@/models/playerModels";
+import { PlayerRole } from "@/models/types";
 
 // Styles
 import "./PlayerImportModal.css";
 
-function PlayerImportModal({ isOpen, onClose, onAddPlayer }) {
-  const [player, setPlayer] = useState({
+interface PlayerImportModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAddPlayer: (player: any) => void;
+}
+
+interface PlayerFormData {
+  name: string;
+  position: PlayerRole;
+}
+
+function PlayerImportModal({
+  isOpen,
+  onClose,
+  onAddPlayer,
+}: PlayerImportModalProps) {
+  const [player, setPlayer] = useState<PlayerFormData>({
     name: "",
     position: playerRoles[0],
   });
-  const [photoPreview, setPhotoPreview] = useState(null);
-  const fileInputRef = useRef();
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files[0];
+  const handlePhotoUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPhotoPreview(reader.result);
+        setPhotoPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newPlayer = {
       id: Date.now(),
@@ -70,7 +89,11 @@ function PlayerImportModal({ isOpen, onClose, onAddPlayer }) {
               ref={fileInputRef}
             />
             {photoPreview && (
-              <img src={photoPreview} alt="Preview" className="photo-preview" />
+              <Image
+                src={photoPreview}
+                alt="Preview"
+                className="photo-preview"
+              />
             )}
           </div>
 
@@ -80,7 +103,9 @@ function PlayerImportModal({ isOpen, onClose, onAddPlayer }) {
               required
               type="text"
               value={player.name}
-              onChange={(e) => setPlayer({ ...player, name: e.target.value })}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setPlayer({ ...player, name: e.target.value })
+              }
             />
           </div>
 
@@ -88,8 +113,8 @@ function PlayerImportModal({ isOpen, onClose, onAddPlayer }) {
             <label>Position:</label>
             <select
               value={player.position}
-              onChange={(e) =>
-                setPlayer({ ...player, position: e.target.value })
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                setPlayer({ ...player, position: e.target.value as PlayerRole })
               }
             >
               {playerRoles.map((role) => (

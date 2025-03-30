@@ -1,15 +1,47 @@
+import Image from "next/image";
+
+// Hooks
 import React, { useState } from "react";
+
+// Models
 import {
   playerAttributes,
   playerRoles,
   calculateOverallScore,
 } from "@/models/playerModels";
+import { Player, PlayerRole } from "@/models/types";
+
+// Styles
 import "./PlayerList.css";
 
-const PlayerList = ({ players, onUpdatePlayer, onDeletePlayer }) => {
-  const [viewingStats, setViewingStats] = useState(null);
+interface PlayerListProps {
+  players: Player[];
+  onUpdatePlayer: (player: Player) => void;
+  onDeletePlayer: (playerId: string) => void;
+}
 
-  const handleViewStats = (player) => {
+interface StatPoint {
+  x: number;
+  y: number;
+  label: string;
+  value: number;
+}
+
+interface GridLine {
+  gridEndX: number;
+  gridEndY: number;
+  labelX: number;
+  labelY: number;
+}
+
+const PlayerList: React.FC<PlayerListProps> = ({
+  players,
+  onUpdatePlayer,
+  onDeletePlayer,
+}) => {
+  const [viewingStats, setViewingStats] = useState<Player | null>(null);
+
+  const handleViewStats = (player: Player) => {
     setViewingStats({ ...player });
   };
 
@@ -17,8 +49,8 @@ const PlayerList = ({ players, onUpdatePlayer, onDeletePlayer }) => {
     setViewingStats(null);
   };
 
-  const getPositionColor = (position) => {
-    const colors = {
+  const getPositionColor = (position: PlayerRole): string => {
+    const colors: Record<PlayerRole, string> = {
       Pivot: "#ff6b6b",
       Ala: "#4dabf7",
       Fixo: "#51cf66",
@@ -28,7 +60,7 @@ const PlayerList = ({ players, onUpdatePlayer, onDeletePlayer }) => {
     return colors[position] || "#868e96";
   };
 
-  const getStatsPoints = (player) => {
+  const getStatsPoints = (player: Player): StatPoint[] => {
     // Use all player attributes
     const displayStats = Object.entries(playerAttributes).map(
       ([key, { label }]) => ({
@@ -50,7 +82,7 @@ const PlayerList = ({ players, onUpdatePlayer, onDeletePlayer }) => {
     });
   };
 
-  const renderStatsChart = (player, showLabels = false) => {
+  const renderStatsChart = (player: Player, showLabels = false) => {
     const points = getStatsPoints(player);
     // Adjust size to be smaller overall
     const size = showLabels ? 280 : 200; // Smaller sizes for both views
@@ -81,7 +113,7 @@ const PlayerList = ({ players, onUpdatePlayer, onDeletePlayer }) => {
     });
 
     // Calculate grid line positions and labels
-    const gridLines = points.map((point, i) => {
+    const gridLines: GridLine[] = points.map((point, i) => {
       const angle = (Math.PI * 2 * i) / points.length;
       const gridEndX = center + Math.cos(angle) * chartSize;
       const gridEndY = center + Math.sin(angle) * chartSize;
@@ -215,7 +247,17 @@ const PlayerList = ({ players, onUpdatePlayer, onDeletePlayer }) => {
       {players.length === 0 ? (
         <div className="empty-players-container">
           <div className="empty-players-message">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
               <circle cx="9" cy="7" r="4"></circle>
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -236,7 +278,7 @@ const PlayerList = ({ players, onUpdatePlayer, onDeletePlayer }) => {
                 <div className="player-header">
                   <div className="player-photo-container">
                     {player.photoUrl ? (
-                      <img
+                      <Image
                         src={player.photoUrl}
                         alt={player.name}
                         className="player-photo"
@@ -298,10 +340,10 @@ const PlayerList = ({ players, onUpdatePlayer, onDeletePlayer }) => {
         <div className="stats-modal-overlay" onClick={handleCloseStats}>
           <div
             className="stats-modal-content"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             <div className="stats-modal-header">
-              <h2>{viewingStats.name}'s Stats</h2>
+              <h2>{viewingStats.name}&apos;s Stats</h2>
               <button className="close-button" onClick={handleCloseStats}>
                 ×
               </button>

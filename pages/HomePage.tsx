@@ -1,7 +1,11 @@
 "use client";
 
+// Components
 import PlayerList from "@/components/PlayerList";
+
+// Hooks
 import { usePlayers } from "@/utils/logic";
+
 const HomePage = () => {
   const { players, updatePlayer, deletePlayer } = usePlayers();
 

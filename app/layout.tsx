@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ReactNode } from "react";
 
 // Components
 import Navbar from "@/components/Navbar";
@@ -22,7 +23,7 @@ export const metadata = {
     "Created to defuse the chaos of managing friends and family in a futsal team",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={`App ${geistSans.variable} ${geistMono.variable}`}>

@@ -1,24 +1,25 @@
 "use client";
 import { atom, useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
+import { Player, Vote } from "../models/types";
 
 // Create a persistent atom for players
-const playersAtom = atomWithStorage("futsalPlayers", []);
+const playersAtom = atomWithStorage<Player[]>("futsalPlayers", []);
 
 // Create a persistent atom for modal state
-const modalOpenAtom = atom(false);
+const modalOpenAtom = atom<boolean>(false);
 
 // Create a persistent atom for votes
-const votesAtom = atomWithStorage("futsalVotes", {});
+const votesAtom = atomWithStorage<Record<string, Vote[]>>("futsalVotes", {});
 
 export function usePlayers() {
   const [players, setPlayers] = useAtom(playersAtom);
 
-  const handleAddPlayer = (newPlayer) => {
+  const handleAddPlayer = (newPlayer: Player) => {
     setPlayers([...players, newPlayer]);
   };
 
-  const handleUpdatePlayer = (updatedPlayer) => {
+  const handleUpdatePlayer = (updatedPlayer: Player) => {
     setPlayers(
       players.map((player) =>
         player.id === updatedPlayer.id ? updatedPlayer : player
@@ -26,7 +27,7 @@ export function usePlayers() {
     );
   };
 
-  const handleDeletePlayer = (playerId) => {
+  const handleDeletePlayer = (playerId: string) => {
     setPlayers(players.filter((player) => player.id !== playerId));
   };
 
@@ -54,17 +55,31 @@ export function usePlayerModal() {
 export function useVoting() {
   const [votes, setVotes] = useAtom(votesAtom);
 
-  const handleSubmitVote = (vote) => {
+  const handleSubmitVote = (vote: Partial<Vote> & { id?: string }) => {
     // Save the vote to our atom storage
     const updatedVotes = { ...votes };
     
     // Add or update vote based on some identifier (like eventId or date)
     if (vote.id) {
-      updatedVotes[vote.id] = vote;
+      const voteId = vote.id;
+      if (!updatedVotes[voteId]) {
+        updatedVotes[voteId] = [];
+      }
+      updatedVotes[voteId].push(vote as Vote);
+    } else if (vote.playerId) {
+      // If no id provided, use playerId instead
+      const playerId = vote.playerId;
+      if (!updatedVotes[playerId]) {
+        updatedVotes[playerId] = [];
+      }
+      updatedVotes[playerId].push(vote as Vote);
     } else {
-      // If no id provided, use timestamp as fallback
+      // Fallback to timestamp if no id
       const id = `vote-${Date.now()}`;
-      updatedVotes[id] = { ...vote, id };
+      if (!updatedVotes[id]) {
+        updatedVotes[id] = [];
+      }
+      updatedVotes[id].push({ ...vote, id } as Vote);
     }
     
     setVotes(updatedVotes);
@@ -72,7 +87,7 @@ export function useVoting() {
   };
 
   // Get all votes or specific vote by id
-  const getVotes = (id = null) => {
+  const getVotes = (id: string | null = null): Record<string, Vote[]> | Vote[] | null => {
     if (id) {
       return votes[id] || null;
     }
@@ -80,7 +95,7 @@ export function useVoting() {
   };
 
   // Save votes (useful for batch operations)
-  const saveVotes = (newVotes) => {
+  const saveVotes = (newVotes: Record<string, Vote[]>) => {
     setVotes(newVotes);
   };
 

@@ -1,19 +1,29 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, FormEvent, ChangeEvent } from "react";
 import { playerAttributes } from "@/models/playerModels";
+import { Player } from "@/models/types";
 import "./PlayerVote.css";
 
-const PlayerVote = ({ player, onSubmitVote }) => {
-  const initialAttributes = Object.keys(playerAttributes).reduce((acc, key) => {
+interface PlayerVoteProps {
+  player: Player;
+  onSubmitVote: (vote: any) => void;
+}
+
+interface VoteAttributes {
+  [key: string]: number;
+}
+
+const PlayerVote: React.FC<PlayerVoteProps> = ({ player, onSubmitVote }) => {
+  const initialAttributes = Object.keys(playerAttributes).reduce<VoteAttributes>((acc, key) => {
     // Start with current player values if they exist, otherwise use 50
     acc[key] = player[key] || 50;
     return acc;
   }, {});
 
-  const [attributes, setAttributes] = useState(initialAttributes);
+  const [attributes, setAttributes] = useState<VoteAttributes>(initialAttributes);
   const [comment, setComment] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const voteToSubmit = {
@@ -26,7 +36,7 @@ const PlayerVote = ({ player, onSubmitVote }) => {
     onSubmitVote(voteToSubmit);
   };
 
-  const handleAttributeChange = (key, value) => {
+  const handleAttributeChange = (key: string, value: string) => {
     setAttributes((prev) => ({
       ...prev,
       [key]: parseInt(value),
@@ -45,7 +55,7 @@ const PlayerVote = ({ player, onSubmitVote }) => {
                 min="0"
                 max="100"
                 value={attributes[key]}
-                onChange={(e) => handleAttributeChange(key, e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => handleAttributeChange(key, e.target.value)}
               />
             </div>
             <span className="stat-value">{attributes[key]}</span>
@@ -57,7 +67,7 @@ const PlayerVote = ({ player, onSubmitVote }) => {
         <label>Comment</label>
         <textarea
           value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setComment(e.target.value)}
           placeholder="Optional: Add a comment about your rating"
         />
       </div>

@@ -1,6 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+// Components
+import Image from "next/image";
 import PlayerVote from "@/components/PlayerVote";
+
+// Models
 import {
   calculateAverageStats,
   hasVoted,
@@ -8,40 +12,59 @@ import {
   validateVote,
 } from "@/models/voteModels";
 import { calculateOverallScore, playerAttributes } from "@/models/playerModels";
+import { Player, Vote } from "@/models/types";
+
+// Hooks
 import { useVoting, usePlayers } from "@/utils/logic";
+import { useState, useEffect } from "react";
+
+// Styles
 import "./VotingPage.css";
 
+interface VoteWithVoter extends Vote {
+  voterName: string;
+}
+
+type VotesRecord = Record<string, VoteWithVoter[]>;
+
 const VotingPage = () => {
-  const { updatePlayer: onUpdatePlayer, players } = usePlayers();
-  const { getVotes, saveVotes, votes: votesFromLogic } = useVoting();
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [currentVoter, setCurrentVoter] = useState(null);
-  const [error, setError] = useState(null);
-  const [votes, setVotes] = useState(votesFromLogic);
+  const { updatePlayer, players } = usePlayers();
+  const { getVotes, saveVotes } = useVoting();
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [currentVoter, setCurrentVoter] = useState<Player | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [votes, setVotes] = useState<VotesRecord>({});
 
   // Load votes from local storage on component mount
   useEffect(() => {
     const storedVotes = getVotes();
-    setVotes(storedVotes);
+    // Ensure we have a valid votes object
+    if (storedVotes && typeof storedVotes === "object") {
+      setVotes(storedVotes as VotesRecord);
 
-    // Update all players with their calculated scores
-    if (players && Object.keys(storedVotes).length > 0) {
-      players.forEach((player) => {
-        const playerVotes = storedVotes[player.id] || [];
-        if (playerVotes.length > 0) {
-          const updatedPlayer = calculatePlayerScoreFromVotes(
-            playerVotes,
-            player
-          );
-          onUpdatePlayer(updatedPlayer);
-        }
-      });
+      // Update all players with their calculated scores
+      if (players && Object.keys(storedVotes).length > 0) {
+        players.forEach((player) => {
+          const playerVotes = (storedVotes as VotesRecord)[player.id] || [];
+          if (playerVotes.length > 0) {
+            const updatedPlayer = calculatePlayerScoreFromVotes(
+              playerVotes,
+              player
+            );
+            updatePlayer(updatedPlayer);
+          }
+        });
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSubmitVote = (vote) => {
-    const voteWithVoter = {
+  const handleSubmitVote = (vote: any) => {
+    if (!currentVoter || !selectedPlayer) return;
+
+    const voteWithVoter: VoteWithVoter = {
       ...vote,
+      id: `vote-${Date.now()}`,
       voterId: currentVoter.id,
       voterName: currentVoter.name,
       timestamp: new Date(),
@@ -64,7 +87,7 @@ const VotingPage = () => {
         updatedVotes[selectedPlayer.id],
         selectedPlayer
       );
-      onUpdatePlayer(updatedPlayer);
+      updatePlayer(updatedPlayer);
 
       // Reset selected player
       setSelectedPlayer(null);
@@ -74,7 +97,9 @@ const VotingPage = () => {
     }
   };
 
-  const handleRemoveVote = (playerId) => {
+  const handleRemoveVote = (playerId: string) => {
+    if (!currentVoter) return;
+
     // Get current votes for the player
     const playerVotes = votes[playerId] || [];
 
@@ -100,12 +125,15 @@ const VotingPage = () => {
         updatedPlayer = {
           ...player,
           // Reset all attributes to initial values (50)
-          ...Object.keys(player).reduce((acc, key) => {
-            if (key in playerAttributes) {
-              acc[key] = 50;
-            }
-            return acc;
-          }, {}),
+          ...Object.keys(playerAttributes).reduce<Record<string, number>>(
+            (acc, key) => {
+              if (key in playerAttributes) {
+                acc[key] = 50;
+              }
+              return acc;
+            },
+            {}
+          ),
         };
       } else {
         // Calculate new scores from remaining votes
@@ -114,7 +142,7 @@ const VotingPage = () => {
           player
         );
       }
-      onUpdatePlayer(updatedPlayer);
+      updatePlayer(updatedPlayer);
     }
 
     setError("Vote removed successfully");
@@ -137,7 +165,7 @@ const VotingPage = () => {
                 <div className="player-info">
                   <div className="player-photo-container">
                     {player.photoUrl ? (
-                      <img
+                      <Image
                         src={player.photoUrl}
                         alt={player.name}
                         className="player-photo"
@@ -199,7 +227,7 @@ const VotingPage = () => {
                     <div className="player-info">
                       <div className="player-photo-container">
                         {player.photoUrl ? (
-                          <img
+                          <Image
                             src={player.photoUrl}
                             alt={player.name}
                             className="player-photo"

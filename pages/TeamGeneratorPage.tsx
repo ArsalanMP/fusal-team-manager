@@ -1,41 +1,62 @@
 "use client";
 
-import React, { useState } from "react";
-import { calculateOverallScore } from "@/models/playerModels";
+// Hooks
+import { useState } from "react";
+
+// Components
 import PlayerListView from "@/components/PlayerListView";
-import "./TeamGeneratorPage.css";
+
+// Hooks
 import { usePlayers } from "@/utils/logic";
+
+// Models
+import { Player, PlayerRole } from "@/models/types";
+import { calculateOverallScore } from "@/models/playerModels";
+
+// Styles
+import "./TeamGeneratorPage.css";
+
+interface PlayerWithScore extends Player {
+  overallScore: number;
+}
+
+interface Team {
+  players: PlayerWithScore[];
+  totalScore: number;
+}
 
 function TeamGenerator() {
   const { players } = usePlayers();
-  const [numberOfTeams, setNumberOfTeams] = useState(2);
-  const [generatedTeams, setGeneratedTeams] = useState(null);
+  const [numberOfTeams, setNumberOfTeams] = useState<number>(2);
+  const [generatedTeams, setGeneratedTeams] = useState<Team[] | null>(null);
 
   const generateTeams = () => {
     // Calculate overall scores for all players
-    const playersWithScores = players.map((player) => ({
+    const playersWithScores: PlayerWithScore[] = players.map((player) => ({
       ...player,
       overallScore: parseFloat(calculateOverallScore(player, player.position)),
     }));
 
     // Group players by position
-    const playersByPosition = playersWithScores.reduce((acc, player) => {
+    const playersByPosition = playersWithScores.reduce<
+      Record<PlayerRole, PlayerWithScore[]>
+    >((acc, player) => {
       if (!acc[player.position]) {
         acc[player.position] = [];
       }
       acc[player.position].push(player);
       return acc;
-    }, {});
+    }, {} as Record<PlayerRole, PlayerWithScore[]>);
 
     // Sort players in each position by overall score
     Object.keys(playersByPosition).forEach((position) => {
-      playersByPosition[position].sort(
+      playersByPosition[position as PlayerRole].sort(
         (a, b) => b.overallScore - a.overallScore
       );
     });
 
     // Initialize teams
-    const teams = Array.from({ length: numberOfTeams }, () => ({
+    const teams: Team[] = Array.from({ length: numberOfTeams }, () => ({
       players: [],
       totalScore: 0,
     }));
@@ -106,7 +127,7 @@ function TeamGenerator() {
                   Rating: {(team.totalScore / team.players.length).toFixed(1)}
                 </div>
               </div>
-              <PlayerListView players={team.players} variant="simple" />
+              <PlayerListView players={team.players} variant="compact" />
             </div>
           ))}
         </div>

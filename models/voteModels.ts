@@ -1,19 +1,22 @@
-// Vote structure
-export const voteModel = {
-  id: String,
-  playerId: String,
-  voterId: String, // Could be user ID or name
-  timestamp: Date,
+import { Vote, VoteAttributes } from './types';
+import { Player } from './types';
+
+// Vote structure example (for reference)
+export const voteModel: Partial<Vote> = {
+  id: '',
+  playerId: '',
+  voterId: '', // Could be user ID or name
+  timestamp: new Date(),
   attributes: {}, // Will contain all player attributes with voted values
-  comment: String, // Optional comment with the vote
+  comment: '', // Optional comment with the vote
 };
 
 // Calculate average stats from votes
-export const calculateAverageStats = (votes) => {
+export const calculateAverageStats = (votes: Vote[]): VoteAttributes => {
   if (!votes || votes.length === 0) return {};
 
   // Initialize sum object
-  const sum = {};
+  const sum: Record<string, number> = {};
 
   // Sum up all values for each attribute
   votes.forEach((vote) => {
@@ -23,7 +26,7 @@ export const calculateAverageStats = (votes) => {
   });
 
   // Calculate average for each attribute
-  const averages = {};
+  const averages: VoteAttributes = {};
   Object.entries(sum).forEach(([key, total]) => {
     averages[key] = Math.round(total / votes.length);
   });
@@ -32,14 +35,14 @@ export const calculateAverageStats = (votes) => {
 };
 
 // Check if a voter has already voted for a player
-export const hasVoted = (votes, voterId, playerId) => {
+export const hasVoted = (votes: Vote[], voterId: string, playerId: string): boolean => {
   return votes.some(
     (vote) => vote.voterId === voterId && vote.playerId === playerId
   );
 };
 
 // Calculate player's score based on votes
-export const calculatePlayerScoreFromVotes = (votes, player) => {
+export const calculatePlayerScoreFromVotes = (votes: Vote[], player: Player): Player => {
   if (!votes || votes.length === 0) return player;
 
   // Get average stats from votes
@@ -57,8 +60,8 @@ export const calculatePlayerScoreFromVotes = (votes, player) => {
 };
 
 // Validate vote values
-export const validateVote = (vote) => {
-  if (!vote.playerId || !vote.voterId) {
+export const validateVote = (vote: Partial<Vote>): boolean => {
+  if (!vote.playerId || !vote.voterId || !vote.attributes) {
     return false;
   }
 
