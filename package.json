@@ -6,9 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "push": "npx prisma db push",
+    "studio": "npx prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^6.5.0",
     "jotai": "^2.12.2",
     "next": "15.2.4",
     "react": "^19.0.0",
@@ -21,6 +24,7 @@
     "@types/react-dom": "^19.0.4",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
+    "prisma": "^6.5.0",
     "typescript": "^5.8.2"
   }
 }
