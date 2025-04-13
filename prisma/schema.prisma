@@ -1,0 +1,47 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("POSTGRES_PRISMA_URL")
+}
+
+model Player {
+    id           String   @id @default(uuid())
+    name         String
+    position     Position @default(Universal)
+    photoUrl     String?
+    lastModified DateTime @default(now())
+    speed        Int?     @default(0)
+    shotPower    Int?     @default(0)
+    shotAccuracy Int?     @default(0)
+    physics      Int?     @default(0)
+    goalkeeping  Int?     @default(0)
+    dribbling    Int?     @default(0)
+    passing      Int?     @default(0)
+    defense      Int?     @default(0)
+    stamina      Int?     @default(0)
+    teamPlay     Int?     @default(0)
+    positioning  Int?     @default(0)
+    reliability  Int?     @default(0)
+    votesGiven   Vote[]   
+}
+
+model Vote {
+    id         String   @id @default(uuid())
+    playerId   String
+    voterId    String
+    timestamp  DateTime @default(now())
+    attributes Json
+    comment    String?
+    Player     Player   @relation(fields: [playerId], references: [id])
+}
+
+enum Position {
+    Pivot
+    Ala
+    Fixo
+    Universal
+    Goleiro
+}

@@ -1,8 +1,0 @@
-src/
-  components/
-    PlayerForm.js
-    PlayerList.js
-    TeamGenerator.js
-  models/
-    playerModel.js
-  App.js 
