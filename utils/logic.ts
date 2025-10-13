@@ -4,31 +4,89 @@ import { atomWithStorage } from "jotai/utils";
 import { Player, Vote } from "../models/types";
 
 // Create a persistent atom for players
-const playersAtom = atomWithStorage<Player[]>("futsalPlayers", []);
+const playersAtom = atom<Player[]>([]);
 
 // Create a persistent atom for modal state
 const modalOpenAtom = atom<boolean>(false);
 
 // Create a persistent atom for votes
-const votesAtom = atomWithStorage<Record<string, Vote[]>>("futsalVotes", {});
+const votesAtom = atom<Record<string, Vote[]>>({});
 
 export function usePlayers() {
   const [players, setPlayers] = useAtom(playersAtom);
 
-  const handleAddPlayer = (newPlayer: Player) => {
-    setPlayers([...players, newPlayer]);
+  const handleAddPlayer = async (newPlayer: Player) => {
+    try {
+      const response = await fetch('/api/players', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newPlayer),
+      });
+
+      if (response.ok) {
+        const createdPlayer = await response.json();
+        setPlayers([...players, createdPlayer]);
+      } else {
+        console.error('Failed to add player');
+      }
+    } catch (error) {
+      console.error('Error adding player:', error);
+    }
   };
 
-  const handleUpdatePlayer = (updatedPlayer: Player) => {
-    setPlayers(
-      players.map((player) =>
-        player.id === updatedPlayer.id ? updatedPlayer : player
-      )
-    );
+  const handleUpdatePlayer = async (updatedPlayer: Player) => {
+    try {
+      const response = await fetch(`/api/players/${updatedPlayer.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedPlayer),
+      });
+
+      if (response.ok) {
+        const updated = await response.json();
+        setPlayers(
+          players.map((player) =>
+            player.id === updated.id ? updated : player
+          )
+        );
+      } else {
+        console.error('Failed to update player');
+      }
+    } catch (error) {
+      console.error('Error updating player:', error);
+    }
   };
 
-  const handleDeletePlayer = (playerId: string) => {
-    setPlayers(players.filter((player) => player.id !== playerId));
+  const handleDeletePlayer = async (playerId: string) => {
+    try {
+      const response = await fetch(`/api/players/${playerId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setPlayers(players.filter((player) => player.id !== playerId));
+      } else {
+        console.error('Failed to delete player');
+      }
+    } catch (error) {
+      console.error('Error deleting player:', error);
+    }
+  };
+
+  const loadPlayers = async () => {
+    try {
+      const response = await fetch('/api/players');
+      if (response.ok) {
+        const playersData = await response.json();
+        setPlayers(playersData);
+      }
+    } catch (error) {
+      console.error('Error loading players:', error);
+    }
   };
 
   return {
@@ -36,6 +94,7 @@ export function usePlayers() {
     addPlayer: handleAddPlayer,
     updatePlayer: handleUpdatePlayer,
     deletePlayer: handleDeletePlayer,
+    loadPlayers,
   };
 }
 
@@ -55,35 +114,59 @@ export function usePlayerModal() {
 export function useVoting() {
   const [votes, setVotes] = useAtom(votesAtom);
 
-  const handleSubmitVote = (vote: Partial<Vote> & { id?: string }) => {
-    // Save the vote to our atom storage
-    const updatedVotes = { ...votes };
-    
-    // Add or update vote based on some identifier (like eventId or date)
-    if (vote.id) {
-      const voteId = vote.id;
-      if (!updatedVotes[voteId]) {
-        updatedVotes[voteId] = [];
+  const handleSubmitVote = async (vote: Partial<Vote> & { id?: string }) => {
+    try {
+      const response = await fetch('/api/votes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(vote),
+      });
+
+      if (response.ok) {
+        const createdVote = await response.json();
+        // Update local state
+        const updatedVotes = { ...votes };
+        const playerId = vote.playerId || createdVote.playerId;
+        if (!updatedVotes[playerId]) {
+          updatedVotes[playerId] = [];
+        }
+        updatedVotes[playerId].push(createdVote);
+        setVotes(updatedVotes);
+        console.log("Vote submitted:", createdVote);
+      } else {
+        const error = await response.json();
+        console.error('Failed to submit vote:', error);
+        throw new Error(error.error || 'Failed to submit vote');
       }
-      updatedVotes[voteId].push(vote as Vote);
-    } else if (vote.playerId) {
-      // If no id provided, use playerId instead
-      const playerId = vote.playerId;
-      if (!updatedVotes[playerId]) {
-        updatedVotes[playerId] = [];
-      }
-      updatedVotes[playerId].push(vote as Vote);
-    } else {
-      // Fallback to timestamp if no id
-      const id = `vote-${Date.now()}`;
-      if (!updatedVotes[id]) {
-        updatedVotes[id] = [];
-      }
-      updatedVotes[id].push({ ...vote, id } as Vote);
+    } catch (error) {
+      console.error('Error submitting vote:', error);
+      throw error;
     }
-    
-    setVotes(updatedVotes);
-    console.log("Vote submitted:", vote);
+  };
+
+  const handleDeleteVote = async (voteId: string) => {
+    try {
+      const response = await fetch(`/api/votes/${voteId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Update local state
+        const updatedVotes = { ...votes };
+        Object.keys(updatedVotes).forEach(playerId => {
+          updatedVotes[playerId] = updatedVotes[playerId].filter(
+            vote => vote.id !== voteId
+          );
+        });
+        setVotes(updatedVotes);
+      } else {
+        console.error('Failed to delete vote');
+      }
+    } catch (error) {
+      console.error('Error deleting vote:', error);
+    }
   };
 
   // Get all votes or specific vote by id
@@ -94,6 +177,27 @@ export function useVoting() {
     return votes;
   };
 
+  // Load votes from API
+  const loadVotes = async () => {
+    try {
+      const response = await fetch('/api/votes');
+      if (response.ok) {
+        const votesData = await response.json();
+        // Group votes by playerId
+        const groupedVotes: Record<string, Vote[]> = {};
+        votesData.forEach((vote: Vote) => {
+          if (!groupedVotes[vote.playerId]) {
+            groupedVotes[vote.playerId] = [];
+          }
+          groupedVotes[vote.playerId].push(vote);
+        });
+        setVotes(groupedVotes);
+      }
+    } catch (error) {
+      console.error('Error loading votes:', error);
+    }
+  };
+
   // Save votes (useful for batch operations)
   const saveVotes = (newVotes: Record<string, Vote[]>) => {
     setVotes(newVotes);
@@ -101,8 +205,10 @@ export function useVoting() {
 
   return {
     submitVote: handleSubmitVote,
+    deleteVote: handleDeleteVote,
     getVotes,
     saveVotes,
+    loadVotes,
     votes
   };
 }

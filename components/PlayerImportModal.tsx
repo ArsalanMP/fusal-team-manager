@@ -50,7 +50,7 @@ function PlayerImportModal({
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newPlayer = {
-      id: Date.now(),
+      id: Date.now().toString(),
       ...player,
       photoUrl: photoPreview,
     };

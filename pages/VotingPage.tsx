@@ -28,36 +28,26 @@ interface VoteWithVoter extends Vote {
 type VotesRecord = Record<string, VoteWithVoter[]>;
 
 const VotingPage = () => {
-  const { updatePlayer, players } = usePlayers();
-  const { getVotes, saveVotes } = useVoting();
+  const { updatePlayer, players, loadPlayers } = usePlayers();
+  const { getVotes, saveVotes, loadVotes } = useVoting();
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [currentVoter, setCurrentVoter] = useState<Player | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [votes, setVotes] = useState<VotesRecord>({});
 
-  // Load votes from local storage on component mount
+  // Load data on component mount
+  useEffect(() => {
+    loadPlayers();
+    loadVotes();
+  }, [loadPlayers, loadVotes]);
+
+  // Update votes state when votes are loaded
   useEffect(() => {
     const storedVotes = getVotes();
-    // Ensure we have a valid votes object
     if (storedVotes && typeof storedVotes === "object") {
       setVotes(storedVotes as VotesRecord);
-
-      // Update all players with their calculated scores
-      if (players && Object.keys(storedVotes).length > 0) {
-        players.forEach((player) => {
-          const playerVotes = (storedVotes as VotesRecord)[player.id] || [];
-          if (playerVotes.length > 0) {
-            const updatedPlayer = calculatePlayerScoreFromVotes(
-              playerVotes,
-              player
-            );
-            updatePlayer(updatedPlayer);
-          }
-        });
-      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getVotes]);
 
   const handleSubmitVote = (vote: any) => {
     if (!currentVoter || !selectedPlayer) return;

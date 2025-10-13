@@ -5,9 +5,15 @@ import PlayerList from "@/components/PlayerList";
 
 // Hooks
 import { usePlayers } from "@/utils/logic";
+import { useEffect } from "react";
 
 const HomePage = () => {
-  const { players, updatePlayer, deletePlayer } = usePlayers();
+  const { players, updatePlayer, deletePlayer, loadPlayers } = usePlayers();
+
+  // Load players on component mount
+  useEffect(() => {
+    loadPlayers();
+  }, [loadPlayers]);
 
   return (
     <div>
