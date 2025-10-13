@@ -4,11 +4,12 @@ import prisma from '@/lib/prisma';
 // GET /api/players/[id] - Get a specific player
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const player = await prisma.player.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         votesGiven: true,
       },
@@ -34,14 +35,15 @@ export async function GET(
 // PUT /api/players/[id] - Update a player
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { name, position, photoUrl, ...attributes } = body;
 
     const player = await prisma.player.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         position,
@@ -64,17 +66,18 @@ export async function PUT(
 // DELETE /api/players/[id] - Delete a player
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // First delete all votes for this player
     await prisma.vote.deleteMany({
-      where: { playerId: params.id },
+      where: { playerId: id },
     });
 
     // Then delete the player
     await prisma.player.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Player deleted successfully' });

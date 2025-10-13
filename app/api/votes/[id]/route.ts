@@ -4,11 +4,12 @@ import prisma from '@/lib/prisma';
 // DELETE /api/votes/[id] - Delete a vote
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.vote.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Vote deleted successfully' });
