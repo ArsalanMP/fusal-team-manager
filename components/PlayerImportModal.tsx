@@ -34,11 +34,28 @@ function PlayerImportModal({
     position: playerRoles[0],
   });
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+
+      setSelectedFile(file);
+      
+      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string);
@@ -47,25 +64,72 @@ function PlayerImportModal({
     }
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const newPlayer = {
-      id: Date.now().toString(),
-      ...player,
-      photoUrl: photoPreview,
-    };
-    onAddPlayer(newPlayer);
+    setIsUploading(true);
 
-    // Reset form
-    setPlayer({
-      name: "",
-      position: playerRoles[0],
-    });
-    setPhotoPreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    try {
+      let photoUrl = null;
+
+      // Upload image if selected
+      if (selectedFile) {
+        console.log('Uploading file:', selectedFile.name, selectedFile.size, selectedFile.type);
+        
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          console.log('Upload response status:', response.status);
+
+          if (response.ok) {
+            const result = await response.json();
+            console.log('Upload successful:', result);
+            photoUrl = result.url;
+          } else {
+            const error = await response.json();
+            console.error('Upload failed:', error);
+            alert(`Upload failed: ${error.error}`);
+            setIsUploading(false);
+            return;
+          }
+        } catch (fetchError) {
+          console.error('Fetch error:', fetchError);
+          alert('Network error during upload. Please try again.');
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      const newPlayer = {
+        id: Date.now().toString(),
+        ...player,
+        photoUrl,
+      };
+      
+      await onAddPlayer(newPlayer);
+
+      // Reset form
+      setPlayer({
+        name: "",
+        position: playerRoles[0],
+      });
+      setPhotoPreview(null);
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      onClose();
+    } catch (error) {
+      console.error('Error submitting player:', error);
+      alert('Failed to add player. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -89,7 +153,7 @@ function PlayerImportModal({
               ref={fileInputRef}
             />
             {photoPreview && (
-              <Image
+              <img
                 src={photoPreview}
                 alt="Preview"
                 className="photo-preview"
@@ -125,8 +189,12 @@ function PlayerImportModal({
             </select>
           </div>
 
-          <button type="submit" className="submit-button">
-            Add Player
+          <button 
+            type="submit" 
+            className="submit-button"
+            disabled={isUploading}
+          >
+            {isUploading ? 'Uploading...' : 'Add Player'}
           </button>
         </form>
       </div>

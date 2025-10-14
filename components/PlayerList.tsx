@@ -278,11 +278,21 @@ const PlayerList: React.FC<PlayerListProps> = ({
                 <div className="player-header">
                   <div className="player-photo-container">
                     {player.photoUrl ? (
-                      <Image
-                        src={player.photoUrl}
-                        alt={player.name}
-                        className="player-photo"
-                      />
+                      player.photoUrl.startsWith('data:') ? (
+                        <img
+                          src={player.photoUrl}
+                          alt={player.name}
+                          className="player-photo"
+                        />
+                      ) : (
+                        <Image
+                          src={player.photoUrl}
+                          alt={player.name}
+                          className="player-photo"
+                          width={80}
+                          height={80}
+                        />
+                      )
                     ) : (
                       <div className="player-photo-placeholder">
                         {player.name.charAt(0)}
